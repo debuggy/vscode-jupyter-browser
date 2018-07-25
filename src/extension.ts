@@ -5,6 +5,8 @@ import * as vscode from 'vscode';
 import * as querystring from 'querystring';
 import {isNil} from 'lodash';
 import * as util from './util';
+import { JupyterServer } from './jupyterServer';
+import * as path from 'path';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -46,25 +48,37 @@ async function activate(context: vscode.ExtensionContext) {
                 querystring.stringify({ path: text })
             }`);
         }),
-        vscode.commands.registerCommand('extension.webview', async function () {
-            let text = await vscode.window.showInputBox({ prompt: 'Please input a URL' });
+        vscode.commands.registerCommand('extension.loadJupyter', async function () {
+            let text = await vscode.window.showInputBox({ prompt: 'Please input the url of existing jupyter server' });
             if(isNil(text)) {
                 vscode.window.showInformationMessage('no url input');
                 return;
-            } else {
-                if (!/^https?:\/\//.test(text)) {
-                    text = `http://${text}`;
-                }
-                const panel = vscode.window.createWebviewPanel(
-                    `preview:${text}`,
-                    text,
-                    vscode.ViewColumn.Active,
-                    {
-                        retainContextWhenHidden: true,
-                        enableScripts: true
-                    }
-                );
-                panel.webview.html = `<script>window.location.href="${text}"</script>`;
+            }
+
+            if (!/^https?:\/\//.test(text)) {
+                text = `http://${text}`;
+            }
+
+            if (!text.match(/http:\/\/[a-zA-Z0-9.-]+:(\d+)\/\?token=([a-zA-Z0-9]+)/)) {
+                let token = await vscode.window.showInputBox({ prompt: 'Please input the token of this jupyter server' });
+                text = `${text}/?token=${token}`;
+            }
+
+            vscode.commands.executeCommand('vscode.previewHtml', `jupyter:host?${
+                querystring.stringify({ path: text })
+            }`);
+        }),
+        vscode.commands.registerCommand('extension.startNewJupyter', async function (uri: vscode.Uri) {
+            const rootDir = path.dirname(uri.fsPath);
+            const server = new JupyterServer(rootDir)
+            try {
+                vscode.commands.executeCommand('vscode.previewHtml', `jupyter:host?${
+                    querystring.stringify({ path: server.endpoint})
+                }`);
+            } catch (e) {
+                vscode.window.showErrorMessage(e.message);
+            } finally {
+                await server.stopServer();
             }
         })
     );

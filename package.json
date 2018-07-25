@@ -13,7 +13,8 @@
     "activationEvents": [
         "onCommand:extension.sayHello",
         "onCommand:extension.preview",
-        "onCommand:extension.webview"
+        "onCommand:extension.loadJupyter",
+        "onCommand:extension.startNewJupyter"
     ],
     "main": "./out/extension",
     "contributes": {
@@ -24,11 +25,32 @@
             },
             {
                 "command": "extension.preview",
-                "title": "preview html"
+                "title": "Preview Html"
             },
             {
-                "command": "extension.webview",
-                "title": "Web View"
+                "command": "extension.loadJupyter",
+                "title": "Load External Jupyter Server"
+            },
+            {
+                "command": "extension.startNewJupyter",
+                "title": "View in Jupyter Server"
+            }
+        ],
+        "menus": {
+            "explorer/context": [
+                {
+                    "command": "extension.startNewJupyter",
+                    "when": "resourceLangId == jupyter",
+                    "group": "navigation"
+                }
+            ]
+        },
+        "languages": [
+            {
+                "id": "jupyter",
+                "extensions": [
+                    ".ipynb"
+                ]
             }
         ]
     },
@@ -46,5 +68,9 @@
         "tslint": "^5.8.0",
         "typescript": "^2.6.1",
         "vscode": "^1.1.6"
+    },
+    "dependencies": {
+        "child-process-promise": "^2.2.1",
+        "lodash": "^4.17.10"
     }
 }
