@@ -1,13 +1,15 @@
 import * as vscode from 'vscode';
 import {WorkspacePythonPath} from './contracts';
 
-export async function getPythonInterpreter(): Promise<string | undefined> {
+export const channel = vscode.window.createOutputChannel('Jupyter AI Output');
+
+export function getPythonInterpreter(): string | undefined {
     const workspaceFolders: vscode.WorkspaceFolder[] | undefined = vscode.workspace.workspaceFolders;
     const setInterpreterGlobally: boolean = !Array.isArray(workspaceFolders) || workspaceFolders.length === 0;
     let wkspace: vscode.Uri | undefined;
 
     if (!setInterpreterGlobally) {
-        const targetConfig = await getWorkspaceToSetPythonPath();
+        const targetConfig = getWorkspaceToSetPythonPath();
         if (!targetConfig) {
             return undefined;
         }
@@ -20,7 +22,7 @@ export async function getPythonInterpreter(): Promise<string | undefined> {
     return pythonPath; 
 }       
 
-async function getWorkspaceToSetPythonPath(): Promise<WorkspacePythonPath | undefined> {
+function getWorkspaceToSetPythonPath(): WorkspacePythonPath | undefined {
     if (!Array.isArray(vscode.workspace.workspaceFolders) || vscode.workspace.workspaceFolders.length === 0) {
         return undefined;
     }
