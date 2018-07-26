@@ -70,15 +70,15 @@ async function activate(context: vscode.ExtensionContext) {
         }),
         vscode.commands.registerCommand('extension.startNewJupyter', async function (uri: vscode.Uri) {
             const rootDir = path.dirname(uri.fsPath);
-            const server = new JupyterServer(rootDir)
+            const server = new JupyterServer(rootDir);
+            const endpoint = 'http://localhost:8889/notebooks/01.train-within-notebook.ipynb?token=0cb0bd569210ec195e3e95d8f855a44a3362a4f5bccbd1bc';
             try {
-                vscode.commands.executeCommand('vscode.previewHtml', `jupyter:host?${
-                    querystring.stringify({ path: server.endpoint})
+                vscode.commands.executeCommand('vscode.previewHtml', `jupyter:notebook?${
+                    querystring.stringify({ path: endpoint})
                 }`);
             } catch (e) {
                 vscode.window.showErrorMessage(e.message);
             } finally {
-                await server.stopServer();
             }
         })
     );
