@@ -5,7 +5,6 @@ import * as path from 'path';
 import {isNil} from 'lodash';
 import * as querystring from 'querystring';
 
-const fkill = require('fkill');
 
 
 export class JupyterServer {
