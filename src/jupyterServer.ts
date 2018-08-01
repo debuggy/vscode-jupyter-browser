@@ -3,7 +3,9 @@ import * as cp from 'child_process';
 import * as util from './util';
 import * as path from 'path';
 import {isNil} from 'lodash';
+import * as querystring from 'querystring';
 
+const fkill = require('fkill');
 
 
 export class JupyterServer {
@@ -16,7 +18,7 @@ export class JupyterServer {
     private fileName: string;
     private startingServerPromise: Promise<void> = Promise.resolve();
 
-    private instance: cp.ChildProcess | null = null;
+    public instance: cp.ChildProcess | null = null;
 
     constructor(dir: string, fileName: string) {
         this.rootDir = dir;
@@ -41,7 +43,7 @@ export class JupyterServer {
                 reject(new Error('no python interpreter found'));
             } else {
                 const pythonBaseDir = path.dirname(pythonPath); 
-                this.instance = cp.spawn(path.join(pythonBaseDir, 'Scripts', 'jupyter.exe'), ['notebook', '--allow-root', '--no-browser', '--NotebookApp.token=${this.token}', `--notebook-dir=${this.rootDir}`]);
+                this.instance = cp.spawn(path.join(pythonBaseDir, 'Scripts', 'jupyter-notebook.exe'), ['--allow-root', '--no-browser', `--NotebookApp.token=${this.token}`, `--notebook-dir=${this.rootDir}`]);
             }
             const outputTimeout: NodeJS.Timer = setTimeout(
                 () => {
@@ -101,7 +103,7 @@ export class JupyterServer {
     }
 
     public async stopServer(): Promise<void> {
-        if (this.isRunning === true && !isNil(this.instance)) {
+        if (!isNil(this.instance)) {
             this.instance.kill();
         }
     }
