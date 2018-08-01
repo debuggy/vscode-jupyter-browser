@@ -35,3 +35,5 @@ function getWorkspaceToSetPythonPath(): WorkspacePythonPath | undefined {
     // const workspaceFolder = await applicationShell.showWorkspaceFolderPick({ placeHolder: 'Select a workspace' });
     // return workspaceFolder ? { folderUri: workspaceFolder.uri, configTarget: ConfigurationTarget.WorkspaceFolder } : undefined;
 }
+
+export const channel = vscode.window.createOutputChannel('jupyterTools4AI');
