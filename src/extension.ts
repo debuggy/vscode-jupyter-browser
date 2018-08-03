@@ -9,6 +9,7 @@ import { JupyterServer } from './jupyterServer';
 import * as path from 'path';
 const fkill = require('fkill');
 
+let count: number = 1;
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 async function activate(context: vscode.ExtensionContext) {
@@ -16,7 +17,23 @@ async function activate(context: vscode.ExtensionContext) {
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "JupyterTools4AI" is now active!');
-    
+
+    vscode.workspace.onDidCloseTextDocument((event) => {
+        vscode.window.showInformationMessage("Closed document: " + event.fileName + event.isClosed + event.isDirty);
+    });
+
+    // vscode.window.onDidChangeVisibleTextEditors((event) => {
+    //     util.channel.appendLine("Visible documents:");
+    //     event.forEach((editor) => {
+    //         try {
+    //             util.channel.appendLine(editor.document.fileName);
+    //         } catch (e) {
+    //             vscode.window.showErrorMessage(e.message);
+    //         }
+    //     });
+    // });
+
+
     // The command has been defined in the package.json file
     // Now provide the implementation of the command with  registerCommand
     // The commandId parameter must match the command field in package.json
@@ -75,7 +92,7 @@ async function activate(context: vscode.ExtensionContext) {
             const server = new JupyterServer(rootDir, fileName);
             try {
                 await server.startServer();
-                vscode.commands.executeCommand('vscode.previewHtml', `jupyter:notebook?${
+                vscode.commands.executeCommand('vscode.previewHtml', `jupyter:notebook${count++}?${
                     querystring.stringify({ path: server.endpoint})
                 }`);
             } catch (e) {
