@@ -3,7 +3,6 @@ import * as cp from 'child_process';
 import * as util from './util';
 import * as path from 'path';
 import {isNil} from 'lodash';
-import * as querystring from 'querystring';
 
 
 
@@ -12,10 +11,10 @@ export class JupyterServer {
     public port?: string = undefined;
     public endpoint?: string = undefined;
 
-    private isRunning: boolean = false;
-    private rootDir: string;
+    public rootDir: string;
     private fileName: string;
     private startingServerPromise: Promise<void> = Promise.resolve();
+    
 
     public instance: cp.ChildProcess | null = null;
 
