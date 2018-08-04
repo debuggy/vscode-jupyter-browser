@@ -1,5 +1,5 @@
 {
-    "name": "JupyterTools4AI",
+    "name": "jupyter_ai_tools",
     "displayName": "JupyterTools4AI",
     "description": "VSCode Tools4AI with better Jupyter Notebook support",
     "version": "0.0.1",
