@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import * as util from './util';
 import * as path from 'path';
 import {isNil} from 'lodash';
+import * as kill from 'tree-kill';
 
 
 
@@ -61,10 +61,9 @@ export class JupyterServer {
                 util.channel.appendLine(`compare: ${data.toString()}`);
                 if (!isNil(match)) {
                     this.port = match[1];
-                    this.endpoint = `http://localhost:${match[1]}/${path.basename(this.rootDir)}/${this.fileName}?token=${this.token}`;
+                    this.endpoint = `http://localhost:${match[1]}/notebooks/${this.fileName}?token=${this.token}`;
                 }
                 if (!isNil(this.endpoint) && !isNil(this.port)) {
-                    this.isRunning = true;
                     if (!isNil(this.instance)) {
                         this.instance.stderr.removeListener('data', handler);
                     }
@@ -81,7 +80,6 @@ export class JupyterServer {
                 util.channel.appendLine(`Flask Stderr: ${data.toString()}`);
             });
             this.instance!.on('error', () => {
-                this.isRunning = false;
                 if (!isNil(this.instance)) {
                     this.instance.removeAllListeners();
                 }
@@ -89,7 +87,6 @@ export class JupyterServer {
                 reject(new Error('Starting local flask server failed.'));
             });
             this.instance!.on('close', () => {
-                this.isRunning = false;
                 if (!isNil(this.instance)) {
                     this.instance.removeAllListeners();
                 }
@@ -102,8 +99,11 @@ export class JupyterServer {
 
     public async stopServer(): Promise<void> {
         if (!isNil(this.instance)) {
-            this.instance.kill();
+            await kill(this.instance.pid);
         }
     }
 
+    public setEndpoint(fileName: string) {
+        this.endpoint = `http://localhost:${this.port}/notebooks/${fileName}?token=${this.token}`
+    }
 }
