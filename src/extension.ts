@@ -5,11 +5,11 @@ import * as vscode from 'vscode';
 import * as querystring from 'querystring';
 import {isNil} from 'lodash';
 import * as util from './util';
-import { JupyterServer } from './jupyterServer';
 import * as path from 'path';
-const fkill = require('fkill');
+import { JupyterServerManager } from './jupyterServerManager';
 
 let count: number = 1;
+const jupyterManager = new JupyterServerManager();
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 async function activate(context: vscode.ExtensionContext) {
@@ -28,6 +28,7 @@ async function activate(context: vscode.ExtensionContext) {
         const interpreter = await util.getPythonInterpreter();
         vscode.window.showInformationMessage(`the current python path: ${interpreter}`);
     });
+
 
     context.subscriptions.push(
         disposable,
@@ -73,25 +74,22 @@ async function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('extension.startNewJupyter', async function (uri: vscode.Uri) {
             const rootDir = path.dirname(uri.fsPath);
             const fileName = path.basename(uri.fsPath);
-            const server = new JupyterServer(rootDir, fileName);
             try {
-                await server.startServer();
+                const endpoint = await jupyterManager.startJupyterServer(rootDir, fileName);
                 vscode.commands.executeCommand('vscode.previewHtml', `jupyter:notebook${count++}?${
-                    querystring.stringify({ path: server.endpoint})
+                    querystring.stringify({ path: endpoint})
                 }`);
             } catch (e) {
                 vscode.window.showErrorMessage(e.message);
-            } finally {
-                if (!isNil(server.instance)) {
-                    await fkill(server.instance.pid, {"force": true, "tree": true});
-                }
             }
-        })
+        }),
+        // The extension host process has at most 5 seconds to shut down, after which it will exit no matter whether dispose is finished.
+        new vscode.Disposable(async (): Promise<void> => { await jupyterManager.stopAllJupyterServers(); })
     );
 }
 
 exports.activate = activate;
 
 // this method is called when your extension is deactivated
-export function deactivate() {
+export async function deactivate() {
 }
