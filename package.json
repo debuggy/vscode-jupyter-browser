@@ -3,7 +3,8 @@
     "displayName": "JupyterTools4AI",
     "description": "VSCode Tools4AI with better Jupyter Notebook support",
     "version": "0.0.1",
-    "publisher": "Microsoft",
+    "publisher": "debuggy",
+    "license" : "MIT",
     "engines": {
         "vscode": "^1.25.0"
     },
