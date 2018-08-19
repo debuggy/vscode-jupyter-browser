@@ -4,7 +4,7 @@
     "description": "VSCode Tools4AI with better Jupyter Notebook support",
     "version": "0.0.1",
     "publisher": "debuggy",
-    "license" : "MIT",
+    "license": "MIT",
     "engines": {
         "vscode": "^1.25.0"
     },
