@@ -4,6 +4,13 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "tslint",
+            "type": "npm",
+            "group": "build",
+            "script": "tslint",
+            "problemMatcher": []
+        },
+        {
             "type": "npm",
             "script": "watch",
             "problemMatcher": "$tsc-watch",

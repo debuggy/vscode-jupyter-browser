@@ -60,6 +60,7 @@
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
         "postinstall": "node ./node_modules/vscode/bin/install",
+        "tslint": "tslint --project ./",
         "test": "npm run compile && node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
@@ -74,6 +75,7 @@
         "tree-kill": "^1.2.0",
         "lodash": "^4.17.10",
         "tslint": "^5.8.0",
-        "typescript": "^2.6.1"
+        "typescript": "^2.6.1",
+        "tslint-microsoft-contrib": "^5.0.1"
     }
 }
