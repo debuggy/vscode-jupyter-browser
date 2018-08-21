@@ -1,33 +1,35 @@
+/**
+ * Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License. See License in the project root for license information.
+ * @author debuggy
+ */
+
 import * as cp from 'child_process';
-import * as util from './util';
-import * as path from 'path';
 import {isNil} from 'lodash';
+import * as path from 'path';
 import * as kill from 'tree-kill';
-
-
+import * as util from 'util';
 
 export class JupyterServer {
     public token: string;
-    public port?: string = undefined;
-    public endpoint?: string = undefined;
-
+    public port: number;
+    public endpoint: string;
     public rootDir: string;
+    public instance: cp.ChildProcess;
+
     private fileName: string;
     private startingServerPromise: Promise<void> = Promise.resolve();
-    
-
-    public instance: cp.ChildProcess | null = null;
 
     constructor(dir: string, fileName: string) {
         this.rootDir = dir;
         this.fileName = fileName;
         this.token = 'abcd';
     }
-    
+
     public async startServer(): Promise<void> {
         const isInstalled: boolean = true; // TODO: there should be a func to check installation of jupyter
 
-        if(isInstalled) {
+        if (isInstalled) {
             await this.startServerInner();
         } else {
             throw new Error('Jupyter not installed!');
@@ -36,11 +38,11 @@ export class JupyterServer {
 
     private async startServerInner(): Promise<void> {
         this.startingServerPromise = new Promise((resolve: () => void, reject: (e: Error) => void): void => {
-            const pythonPath = util.getPythonInterpreter();
+            const pythonPath: string = util.getPythonInterpreter();
             if (isNil(pythonPath)) {
                 reject(new Error('no python interpreter found'));
             } else {
-                const pythonBaseDir = path.dirname(pythonPath); 
+                const pythonBaseDir = path.dirname(pythonPath);
                 this.instance = cp.spawn(path.join(pythonBaseDir, 'Scripts', 'jupyter-notebook.exe'), ['--allow-root', '--no-browser', `--NotebookApp.token=${this.token}`, `--notebook-dir=${this.rootDir}`]);
             }
             const outputTimeout: NodeJS.Timer = setTimeout(
