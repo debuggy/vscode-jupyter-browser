@@ -27,7 +27,7 @@ export class JupyterServer {
     }
 
     public async startServer(): Promise<void> {
-        const isInstalled: boolean = true; // TODO: there should be a func to check installation of jupyter
+        const isInstalled: boolean = true;
 
         if (isInstalled) {
             await this.startServerInner();
@@ -36,14 +36,26 @@ export class JupyterServer {
         }
     }
 
+    public async stopServer(): Promise<void> {
+        if (!isNil(this.instance)) {
+            await kill(this.instance.pid);
+        }
+    }
+
+    public setEndpoint(fileName: string): void {
+        this.endpoint = `http://localhost:${this.port}/notebooks/${fileName}?token=${this.token}`;
+    }
+
     private async startServerInner(): Promise<void> {
         this.startingServerPromise = new Promise((resolve: () => void, reject: (e: Error) => void): void => {
             const pythonPath: string = util.getPythonInterpreter();
             if (isNil(pythonPath)) {
                 reject(new Error('no python interpreter found'));
             } else {
-                const pythonBaseDir = path.dirname(pythonPath);
-                this.instance = cp.spawn(path.join(pythonBaseDir, 'Scripts', 'jupyter-notebook.exe'), ['--allow-root', '--no-browser', `--NotebookApp.token=${this.token}`, `--notebook-dir=${this.rootDir}`]);
+                const pythonBaseDir: string = path.dirname(pythonPath);
+                this.instance = cp.spawn(
+                    path.join(pythonBaseDir, 'Scripts', 'jupyter-notebook.exe'),
+                    ['--no-browser', `--NotebookApp.token=${this.token}`, `--notebook-dir=${this.rootDir}`]);
             }
             const outputTimeout: NodeJS.Timer = setTimeout(
                 () => {
@@ -57,9 +69,9 @@ export class JupyterServer {
                 10000
             );
             const handler: Function = (data: string | Buffer): void => {
-                const pattern = /http:\/\/localhost:(\d+)\/\?token=/;
+                const pattern: RegExp = /http:\/\/localhost:(\d+)\/\?token=/;
                 util.channel.appendLine('handler enter!');
-                let match: string[] | null = data.toString().match(pattern);
+                const match: string[] = data.toString().match(pattern);
                 util.channel.appendLine(`compare: ${data.toString()}`);
                 if (!isNil(match)) {
                     this.port = match[1];
@@ -77,35 +89,25 @@ export class JupyterServer {
             // this.instance!.stdout.on('data', (data: string | Buffer): void => {
             //     util.channel.appendLine(`Flask Stdout: ${data.toString()}`);
             // });
-            this.instance!.stderr.on('data', handler);
-            this.instance!.stderr.on('data', (data: string | Buffer): void => {
+            this.instance.stderr.on('data', handler);
+            this.instance.stderr.on('data', (data: string | Buffer): void => {
                 util.channel.appendLine(`Flask Stderr: ${data.toString()}`);
             });
-            this.instance!.on('error', () => {
+            this.instance.on('error', () => {
                 if (!isNil(this.instance)) {
                     this.instance.removeAllListeners();
                 }
                 this.instance = null;
                 reject(new Error('Starting local flask server failed.'));
             });
-            this.instance!.on('close', () => {
+            this.instance.on('close', () => {
                 if (!isNil(this.instance)) {
                     this.instance.removeAllListeners();
                 }
                 this.instance = null;
                 reject(new Error('Starting local flask server failed.'));
             });
-        });     
+        });
         await this.startingServerPromise;
-    }
-
-    public async stopServer(): Promise<void> {
-        if (!isNil(this.instance)) {
-            await kill(this.instance.pid);
-        }
-    }
-
-    public setEndpoint(fileName: string) {
-        this.endpoint = `http://localhost:${this.port}/notebooks/${fileName}?token=${this.token}`
     }
 }
