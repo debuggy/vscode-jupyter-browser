@@ -12,7 +12,6 @@ import * as vscode from 'vscode';
 import { JupyterServerManager } from 'jupyterServerManager';
 import * as util from 'util';
 
-let count: number = 1;
 const jupyterManager: JupyterServerManager = new JupyterServerManager();
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -44,6 +43,7 @@ async function activate(context: vscode.ExtensionContext): Promise<void> {
                 return;
             } else {
                 if (!/^https?:\/\//.test(<string>text)) {
+                    // tslint:disable-next-line:no-http-string
                     text = `http://${text}`;
                 }
             }
@@ -60,6 +60,7 @@ async function activate(context: vscode.ExtensionContext): Promise<void> {
             }
 
             if (!/^https?:\/\//.test(text)) {
+                // tslint:disable-next-line:no-http-string
                 text = `http://${text}`;
             }
 
