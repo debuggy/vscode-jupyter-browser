@@ -4,13 +4,15 @@
  * @author debuggy
  */
 
- // TODO: JSDOC
 import * as cp from 'child_process';
+import * as util from 'common/util';
 import {isNil} from 'lodash';
 import * as path from 'path';
 import * as kill from 'tree-kill';
-import * as util from 'util';
 
+/**
+ * Class of jupyter server
+ */
 export class JupyterServer {
     public token: string;
     public port: number;
@@ -39,7 +41,7 @@ export class JupyterServer {
 
     public async stopServer(): Promise<void> {
         if (!isNil(this.instance)) {
-            await kill(this.instance.pid);
+            kill(this.instance.pid);
         }
     }
 

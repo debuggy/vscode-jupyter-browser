@@ -8,6 +8,9 @@ import { isNil } from 'lodash';
 
 import { JupyterServer } from 'jupyterServer';
 
+/**
+ * Class of jupyter server manager
+ */
 export class JupyterServerManager {
     private serverList: JupyterServer[] = [];
 
@@ -25,6 +28,8 @@ export class JupyterServerManager {
     }
 
     public async stopAllJupyterServers(): Promise<void> {
-        await Promise.all(this.serverList.map(async (server: JupyterServer) => await server.stopServer()));
+        await Promise.all(this.serverList.map(async (server: JupyterServer) => {
+            await server.stopServer();
+        }));
     }
 }
