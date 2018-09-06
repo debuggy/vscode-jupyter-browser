@@ -9,8 +9,8 @@ import * as path from 'path';
 import * as querystring from 'querystring';
 import * as vscode from 'vscode';
 
+import * as util from 'common/util';
 import { JupyterServerManager } from 'jupyterServerManager';
-import * as util from 'util';
 
 const jupyterManager: JupyterServerManager = new JupyterServerManager();
 // this method is called when your extension is activated
@@ -24,8 +24,8 @@ async function activate(context: vscode.ExtensionContext): Promise<void> {
         // The code you place here will be executed every time your command is executed
 
         // Display a message box to the user
-        const interpreter: string = await util.getPythonInterpreter();
-        vscode.window.showInformationMessage(`the current python path: ${interpreter}`);
+        const interpreter: string = util.getPythonInterpreter();
+        void vscode.window.showInformationMessage(`the current python path: ${interpreter}`);
     });
 
     context.subscriptions.push(
@@ -38,7 +38,7 @@ async function activate(context: vscode.ExtensionContext): Promise<void> {
         vscode.commands.registerCommand('extension.preview', async () => {
             let text: string | undefined = await vscode.window.showInputBox({ prompt: 'Please input a URL' });
             if (isNil(text)) {
-                vscode.window.showInformationMessage('no url input');
+                void vscode.window.showInformationMessage('no url input');
 
                 return;
             } else {
@@ -47,14 +47,14 @@ async function activate(context: vscode.ExtensionContext): Promise<void> {
                     text = `http://${text}`;
                 }
             }
-            vscode.commands.executeCommand('vscode.previewHtml', `jupyter:host?${
+            await vscode.commands.executeCommand('vscode.previewHtml', `jupyter:host?${
                 querystring.stringify({ path: text })
             }`);
         }),
         vscode.commands.registerCommand('extension.loadJupyter', async () => {
             let text: string = await vscode.window.showInputBox({ prompt: 'Please input the url of existing jupyter server' });
             if (isNil(text)) {
-                vscode.window.showInformationMessage('no url input');
+                void vscode.window.showInformationMessage('no url input');
 
                 return;
             }
@@ -64,12 +64,12 @@ async function activate(context: vscode.ExtensionContext): Promise<void> {
                 text = `http://${text}`;
             }
 
-            if (!text.match(/http:\/\/[a-zA-Z0-9.-]+:(\d+)\/\?token=([a-zA-Z0-9]+)/)) {
+            if (isNil(text.match(/http:\/\/[a-zA-Z0-9.-]+:(\d+)\/\?token=([a-zA-Z0-9]+)/))) {
                 const token: string = await vscode.window.showInputBox({ prompt: 'Please input the token of this jupyter server' });
                 text = `${text}/?token=${token}`;
             }
 
-            vscode.commands.executeCommand('vscode.previewHtml', `jupyter:host?${
+            await vscode.commands.executeCommand('vscode.previewHtml', `jupyter:host?${
                 querystring.stringify({ path: text })
             }`);
         }),
@@ -78,11 +78,11 @@ async function activate(context: vscode.ExtensionContext): Promise<void> {
             const fileName: string = path.basename(uri.fsPath);
             try {
                 const endpoint: string = await jupyterManager.startJupyterServer(rootDir, fileName);
-                vscode.commands.executeCommand('vscode.previewHtml', `jupyter:notebook${count + 1}?${
+                await vscode.commands.executeCommand('vscode.previewHtml', `jupyter:notebook?${
                     querystring.stringify({ path: endpoint})
                 }`);
             } catch (e) {
-                vscode.window.showErrorMessage(e.message);
+                void vscode.window.showErrorMessage(e.message);
             }
         }),
         // The extension host process has at most 5 seconds to shut down, after which it will exit no matter whether dispose is finished.
