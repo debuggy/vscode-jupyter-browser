@@ -1,5 +1,7 @@
 # JupyterTools4AI README
 
+[![MIT licensed](https://img.shields.io/badge/license-MIT-yellow.svg)](https://github.com/debuggy/JupyterTools4AI/blob/master/LICENSE.txt)
+
 This is a vscode extension which means to support jupyter server in vscode editor.
 
 ## Features
